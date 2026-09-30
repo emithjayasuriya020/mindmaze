@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101613">
+  <meta name="description" content="A quiet space for your memories and the things you want to keep in mind.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+  <title>Mind Maze — a little space for you</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon-180.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <section id="gate" class="gate">
+    <div class="gate-card">
+      <img src="./icon.svg" width="64" height="64" alt="">
+      <p class="eyebrow">YOUR OWN LITTLE SPACE</p>
+      <h1>Some things deserve<br>a place to stay.</h1>
+      <p class="muted">The moments that happened. The things that matter.<br>Keep them here, at your own pace.</p>
+      <form id="unlock-form">
+        <label for="password" id="password-label">Create a vault password</label>
+        <input id="password" type="password" autocomplete="new-password" minlength="10" required placeholder="At least 10 characters">
+        <div id="confirm-field"><label for="confirm-password">Confirm password</label><input id="confirm-password" type="password" autocomplete="new-password"></div>
+        <button class="primary wide" id="unlock-button">Create my space</button>
+        <p id="gate-error" class="error" role="alert"></p>
+      </form>
+      <p class="fine">Your vault is encrypted in this browser. Your password is never sent to a server. Keep it safe: there is no password reset.</p>
+      <button class="text-button" id="gate-restore">Restore an encrypted backup</button>
+      <p id="gate-note" class="fine"></p>
+    </div>
+  </section>
+
+  <div id="shell" class="shell" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="#today"><img src="./icon.svg" width="36" height="36" alt=""><span>mind maze<span class="brand-small">A little space for you</span></span></a>
+      <nav aria-label="Main navigation">
+        <button data-page="today"><span class="nav-icon">◷</span><span>Today</span></button>
+        <button data-page="keep"><span class="nav-icon">◇</span><span>Keep in mind</span></button>
+        <button data-page="maze"><span class="nav-icon">⌁</span><span>Connections</span></button>
+        <button data-page="library"><span class="nav-icon">▤</span><span>Library</span></button>
+      </nav>
+      <div class="sidebar-note"><span class="tiny-dot"></span> A space without a score.<p>You don’t have to remember everything.</p></div>
+    </aside>
+    <div class="workspace">
+      <header class="toolbar">
+        <span class="toolbar-date" id="today-date"></span>
+        <div class="toolbar-actions">
+          <button id="quiet" aria-pressed="false" class="quiet-button">Quiet view</button>
+          <button id="settings-open" aria-label="Open settings and backup">Settings</button>
+          <button id="lock">Lock</button>
+        </div>
+      </header>
+      <main id="main" tabindex="-1"></main>
+      <footer class="page-footer">Made for remembering, not keeping up.</footer>
+    </div>
+  </div>
+
+  <dialog id="editor" aria-labelledby="editor-heading">
+    <form id="entry-form" class="dialog-content">
+      <header class="dialog-header"><button type="button" id="editor-cancel" class="text-button">Cancel</button><h2 id="editor-heading">A new memory</h2><button id="save-entry" class="primary">Save</button></header>
+      <div class="field"><label for="entry-type">A place for this</label><select id="entry-type"><option value="moment">My day</option><option value="keep">Keep in mind</option></select></div>
+      <label for="entry-title">Give it a name <span class="optional">optional</span></label>
+      <input id="entry-title" maxlength="160" placeholder="A moment worth keeping">
+      <label for="entry-body">What would you like to remember?</label>
+      <textarea id="entry-body" rows="5" maxlength="20000" placeholder="A few words are enough."></textarea>
+      <div class="attachments">
+        <button type="button" id="photo-add">＋ Photo</button>
+        <button type="button" id="record">● Voice note</button>
+        <span id="record-status" role="status"></span>
+      </div>
+      <div id="draft-attachments"></div>
+      <fieldset class="mood-field"><legend>How did it feel? <span class="optional">optional</span></legend>
+        <label><input type="radio" name="mood" value="good"><span>Good</span></label>
+        <label><input type="radio" name="mood" value="neutral" checked><span>Okay</span></label>
+        <label><input type="radio" name="mood" value="hard"><span>Heavy</span></label>
+      </fieldset>
+      <details><summary>People, places &amp; other details</summary>
+        <label for="entry-people">People</label><input id="entry-people" maxlength="500" placeholder="Names, separated by commas">
+        <label for="entry-place">Place</label><input id="entry-place" maxlength="160" placeholder="Somewhere that matters">
+        <label for="entry-tags">Tags</label><input id="entry-tags" maxlength="500" placeholder="Family, work, little wins…">
+        <label for="entry-date">When it happened</label><input id="entry-date" type="date" required>
+      </details>
+      <div id="review-field"><label for="entry-review">When would you like to revisit it?</label><select id="entry-review"><option>No rush</option><option>Tonight</option><option>Tomorrow</option><option>This week</option></select><p class="fine">These are your own groups. They don’t send notifications.</p></div>
+      <p id="editor-error" class="error" role="alert"></p>
+    </form>
+  </dialog>
+
+  <dialog id="detail" aria-labelledby="detail-title"><div class="dialog-content" id="detail-content"></div></dialog>
+  <dialog id="settings" aria-labelledby="settings-title">
+    <div class="dialog-content">
+      <header class="dialog-header"><h2 id="settings-title">Your space, your choice</h2><button data-close="settings">Close</button></header>
+      <section class="settings-section"><h3>A copy you control</h3><p class="muted">Download an encrypted backup, including your photos and voice notes. You’ll need the vault password to restore it.</p><button id="backup" class="primary">Download backup</button><button id="restore" class="secondary">Restore backup</button><p class="fine">Restoring replaces this browser’s current library. Export it first if you want to keep both.</p></section>
+      <section class="settings-section"><h3>Where your memories live</h3><p class="muted">Only in this browser on this device. They don’t automatically sync to your phone or another browser. Clearing site data or using private browsing can remove them.</p><button id="persist">Ask browser to retain my data</button><p id="storage-status" class="fine" role="status"></p></section>
+      <section class="settings-section"><h3>On your iPhone</h3><p class="muted">In Safari, open Share → Add to Home Screen. Open it once while online; then the website can work offline.</p><p class="fine">Safari and the Home Screen app may use separate storage. Export a backup first and restore it in the version you plan to use.</p></section>
+      <section class="settings-section"><h3>Privacy, plainly</h3><p class="muted">Notes and attachments are encrypted before saving. The website has no analytics or cloud accounts. Your hosting provider can still see ordinary page-request information. This password lock does not provide Face ID.</p></section>
+    </div>
+  </dialog>
+  <dialog id="restore-dialog" aria-labelledby="restore-heading">
+    <form id="restore-form" class="dialog-content">
+      <header class="dialog-header"><h2 id="restore-heading">Restore your space</h2><button type="button" data-close="restore-dialog">Cancel</button></header>
+      <p class="muted">Choose a Mind Maze web backup and enter the password used when it was created.</p>
+      <label for="backup-file">Encrypted backup file</label><input id="backup-file" type="file" accept=".json,application/json" required>
+      <label for="backup-password">Backup password</label><input id="backup-password" type="password" required autocomplete="off">
+      <label class="check-label"><input type="checkbox" id="replace-confirm" required><span>I understand this replaces the current browser library.</span></label>
+      <button class="primary" id="restore-submit">Restore backup</button><p id="restore-error" role="alert" class="error"></p>
+    </form>
+  </dialog>
+  <input id="photo-file" type="file" accept="image/*" hidden>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>
